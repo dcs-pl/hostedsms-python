@@ -40,6 +40,10 @@ class GetUnreadDeliveryReportsResponse(GetDeliveryReportsResponse):
     pass
 
 
+class GetReadDeliveryReportsResponse(GetDeliveryReportsResponse):
+    pass
+
+
 class GetValidSendersResponse(HostedSmsApiResponse):
 
     def __init__(self, response):
