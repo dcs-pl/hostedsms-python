@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os.path
 import random
 import string
 import unittest
@@ -8,18 +8,24 @@ from hostedsms.api import HostedSMSApi
 from hostedsms.exceptions import HostedSMSApiException
 from hostedsms.responses import *
 
+tests_dir = os.path.abspath(os.path.dirname(__file__))
+HSMS_TEST_PHONE = os.environ.get('HSMS_TEST_PHONE', '502505978')
+HSMS_TEST_URL = os.environ.get('HSMS_TEST_URL', 'file://' + tests_dir + '/testapi.wsdl')
+HSMS_TEST_USERNAME = os.environ.get('HSMS_TEST_USERNAME')
+HSMS_TEST_PASSWORD = os.environ.get('HSMS_TEST_PASSWORD')
+
 
 class BaseHostedSMSApiTest(unittest.TestCase):
     """Base settings"""
     def setUp(self):
-        self.phone = '111111111'  # set valid number
+        self.phone = HSMS_TEST_PHONE
         self.message = 'Test message'
         self.transaction_id = self.random_transaction_id()
         self.sender = 'INFO'
-        self.api = HostedSMSApi(self.username, self.password, self.url)
+        self.api = HostedSMSApi(self.username, self.password, url=HSMS_TEST_URL)
         if not all((getattr(self, attr, False) for attr in (
-                'username', 'url', 'password'))):
-            raise unittest.SkipTest('Username, password and url are required')
+                'username', 'password'))):
+            raise unittest.SkipTest('Username and password are required')
 
     def assertHasAttr(self, obj, attr):
         assert hasattr(obj, attr)
@@ -45,7 +51,6 @@ class InvalidCredentialsTest(BaseHostedSMSApiTest):
         """Setup tests"""
         self.username = '1'
         self.password = '1'
-        self.url = 'https://testapi.hostedsms.pl/WS/smssender.asmx?WSDL'
         super(InvalidCredentialsTest, self).setUp()
 
     def test_getdeliveryreports(self):
@@ -82,9 +87,8 @@ class CorrectDataTest(BaseHostedSMSApiTest):
 
     def setUp(self):
         """Setup tests"""
-        self.username = ''  # Fill
-        self.password = ''  # Fill
-        self.url = 'https://testapi.hostedsms.pl/WS/smssender.asmx?WSDL'
+        self.username = HSMS_TEST_USERNAME
+        self.password = HSMS_TEST_PASSWORD
         super(CorrectDataTest, self).setUp()
 
     def assertHasCurrentTime(self, response):
