@@ -13,7 +13,8 @@ setup(
     packages=['hostedsms'],
     license='Apache v2 License',
     install_requires=[
-        "suds-jurko == 0.6",
+        'suds-jurko >= 0.6; python_version < "3"',
+        'suds >= 1; python_version >= "3.5"',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
