@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name='hostedsms-api',
-    version='0.01a1',
+    version='0.1.0',
     description='Python library for sending SMS via HostedSMS.pl',
     author='dcs.pl',
     author_email='info@dcs.pl',
