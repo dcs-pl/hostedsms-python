@@ -1,11 +1,8 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='hostedsms-api',
-    version='0.1.0',
+    version='0.1.1',
     description='Python library for sending SMS via HostedSMS.pl',
     author='dcs.pl',
     author_email='info@dcs.pl',
@@ -13,17 +10,21 @@ setup(
     packages=['hostedsms'],
     license='Apache v2 License',
     install_requires=[
-        'suds-jurko >= 0.6; python_version < "3"',
-        'suds >= 1; python_version >= "3.5"',
+        'suds >= 1',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
-    ]
+    ],
+    python_requires='>=3.7',
 )
