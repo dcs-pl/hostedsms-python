@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='hostedsms-api',
-    version='0.1.1',
+    version='1.1.0',
     description='Python library for sending SMS via HostedSMS.pl',
     author='dcs.pl',
     author_email='info@dcs.pl',
@@ -23,6 +23,8 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],

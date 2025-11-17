@@ -1,5 +1,7 @@
+import random
+import string
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import List, Optional
 from suds.cache import NoCache
 from suds.client import Client
 from .exceptions import HostedSMSApiException
@@ -19,6 +21,12 @@ class HostedSMSApi:
             url = HOSTED_SMS_URL
         self._client: Client = Client(url, cache=NoCache())
         self._client.set_options(port='SmsSenderSoap')
+    
+    def get_transaction_id(self):
+        chars = string.ascii_letters + string.digits
+        transaction_id = "".join(random.choice(chars) for _ in range(20))
+        print("transaction_id:", transaction_id)
+        return transaction_id
 
     def get_delivery_reports(self, message_ids: List[str], mark_as_read: bool = False) -> GetReadDeliveryReportsResponse:
         """Get delivery reports for given message IDs."""
@@ -49,7 +57,7 @@ class HostedSMSApi:
 
     def send_sms(
         self, phone: Optional[str] = None, message: Optional[str] = None, sender: Optional[str] = None, transaction_id: Optional[str] = None,
-        validity_period: Any = None, priority: int = 0, flash_sms: bool = False
+        validity_period: Optional[datetime] = None, priority: int = 0, flash_sms: bool = False
     ) -> SendSmsResponse:
         """Send a single SMS message."""
         response = self._client.service.SendSms(
@@ -61,7 +69,7 @@ class HostedSMSApi:
 
     def send_smses(
         self, phones: List[str], message: Optional[str] = None, sender: Optional[str] = None,
-        transaction_id: Optional[str] = None, validity_period: Any = None, priority: int = 0,
+        transaction_id: Optional[str] = None, validity_period: Optional[datetime] = None, priority: int = 0,
         flash_sms: bool = False
     ) -> SendSmsesResponse:
         """Send multiple SMS messages."""

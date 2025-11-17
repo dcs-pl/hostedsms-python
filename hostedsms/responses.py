@@ -27,17 +27,14 @@ class DeliveryReport:
     phone: str
     message_id: str
     status: int
-    delivery_time: Any
+    delivery_time: datetime
 
     def __init__(self, report: Any):
         self.report_id = str(getattr(report, 'ReportId', ''))
         self.phone = str(getattr(report, 'Phone', ''))
         self.message_id = str(getattr(report, 'MessageId', ''))
         self.status = int(getattr(report, 'Status', 0))
-        self.delivery_time = getattr(report, 'DeliveryTime', None)
-
-    def __repr__(self) -> str:
-        return f'<DeliveryReport {self.report_id}>'
+        self.delivery_time = getattr(report, 'DeliveryTime')
 
 
 class GetDeliveryReportsResponse(HostedSmsApiResponse):
@@ -47,9 +44,6 @@ class GetDeliveryReportsResponse(HostedSmsApiResponse):
         self.delivery_reports: List[DeliveryReport] = [
             DeliveryReport(report) for report in getattr(getattr(response, 'DeliveryReports', None), 'DeliveryReport', [])
         ]
-
-    def __repr__(self) -> str:
-        return f'<GetUnreadDeliveryReports {self.current_time}>'
 
 
 class GetUnreadDeliveryReportsResponse(GetDeliveryReportsResponse):
@@ -103,16 +97,12 @@ class InputSms:
         self.message_id = str(getattr(sms, 'MessageId', ''))
         self.phone = str(getattr(sms, 'Phone', ''))
         self.recipient = str(getattr(sms, 'Recipient', ''))
-        self.message = str(getattr(sms, 'Message', ''
-                                   ))
+        self.message = str(getattr(sms, 'Message', ''))
         received_time = getattr(sms, 'ReceivedTime', None)
-        if isinstance(received_time, datetime) or received_time is None:
+        if received_time is None:
             self.received_time = received_time
         else:
             try:
                 self.received_time = datetime.fromisoformat(str(received_time))
             except Exception:
                 self.received_time = None
-
-    def __repr__(self) -> str:
-        return f'<InputSms {self.message_id} {self.phone} {self.recipient} {self.received_time}>'
