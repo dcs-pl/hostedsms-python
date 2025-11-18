@@ -1,46 +1,35 @@
+import random
+import string
+from datetime import datetime
+from typing import List, Optional
 from suds.cache import NoCache
 from suds.client import Client
-
-from .exceptions import *
-from .responses import *
+from .exceptions import HostedSMSApiException
+from .responses import (
+    GetUnreadDeliveryReportsResponse, GetReadDeliveryReportsResponse,
+    GetValidSendersResponse, SendSmsResponse, SendSmsesResponse, GetInputSmsesResponse
+)
 from .settings import HOSTED_SMS_URL
 
 
-class HostedSMSApi(object):
+class HostedSMSApi:
     """Api for HostedSMS"""
-
-    def __init__(self, username, password, url=None):
-        """Set user and password for API
-
-        :param username: User login in hostedsms.pl
-        :type username: str
-        :param password: User password in hostedsms.pl
-        :type password: str
-
-        :param url: option url if differ from specified in settings
-        :type url: str
-
-        """
-        self.username = username
-        self.password = password
+    def __init__(self, username: str, password: str, url: Optional[str] = None):
+        self.username: str = username
+        self.password: str = password
         if not url:
             url = HOSTED_SMS_URL
-        self._client = Client(url, cache=NoCache())
+        self._client: Client = Client(url, cache=NoCache())
         self._client.set_options(port='SmsSenderSoap')
+    
+    def get_transaction_id(self):
+        chars = string.ascii_letters + string.digits
+        transaction_id = "".join(random.choice(chars) for _ in range(20))
+        print("transaction_id:", transaction_id)
+        return transaction_id
 
-    def get_delivery_reports(self, message_ids, mark_as_read=False):
-        """Call GetDeliveryReports API method
-
-        :param message_id: List of message ids
-        :type message_id: list of str
-        :param mark_as_read: Should messages be marked as read
-        :type mark_as_read: bool
-
-        :return: Object representing response
-        :rtype: GetDeliveryReportsResponse
-
-        :raises HostedSmsApiException: when API return error
-        """
+    def get_delivery_reports(self, message_ids: List[str], mark_as_read: bool = False) -> GetReadDeliveryReportsResponse:
+        """Get delivery reports for given message IDs."""
         ids_obj = self._client.factory.create('ArrayOfGuid')
         for messageid in message_ids:
             ids_obj.guid.append(messageid)
@@ -50,28 +39,16 @@ class HostedSMSApi(object):
             raise HostedSMSApiException(response.ErrorMessage)
         return GetReadDeliveryReportsResponse(response)
 
-    def get_unread_delivery_reports(self):
-        """Call GetUnreadDeliveryReports API method
-
-        :return: Object representing response
-        :rtype: GetUnreadDeliveryReportsResponse
-
-        :raises HostedSmsApiException: when API return error
-        """
+    def get_unread_delivery_reports(self) -> GetUnreadDeliveryReportsResponse:
+        """Get unread delivery reports."""
         response = self._client.service.GetUnreadDeliveryReports(
             self.username, self.password)
         if not response.GetUnreadDeliveryReportsResult:
             raise HostedSMSApiException(response.ErrorMessage)
         return GetUnreadDeliveryReportsResponse(response)
 
-    def get_valid_senders(self):
-        """Call GetValidSenders API method
-
-        :return: Object representing response
-        :rtype: GetValidSendersResponse
-
-        :raises HostedSmsApiException: when API return error
-        """
+    def get_valid_senders(self) -> GetValidSendersResponse:
+        """Get valid senders for the account."""
         response = self._client.service.GetValidSenders(
             self.username, self.password)
         if not response.GetValidSendersResult:
@@ -79,30 +56,10 @@ class HostedSMSApi(object):
         return GetValidSendersResponse(response)
 
     def send_sms(
-            self, phone=None, message=None, sender=None, transaction_id=None,
-            validity_period=None, priority=0, flash_sms=False):
-        """Call SendSms API method
-        :param phone: Phone number where sms should be sent
-        :type phone: str
-        :param message: Message text
-        :type message: str
-        :param sender: Sender name (should be in array returned by
-            GetValidSenders()
-        :type sender: str
-        :param transaction_id: Id of transaction
-        :type transaction_id: str
-        :param validity_period: How long SMS should be valid.
-        :type validity_period: datetime
-        :param priority: How important is that message
-        :type priority: 0..3
-        :param flash_sms: Should message be sent as flash sms
-        :type flash_sms: bool
-
-        :return: Object representing response
-        :rtype: SmsResponse
-
-        :raises HostedSmsApiException: when API return error
-        """
+        self, phone: Optional[str] = None, message: Optional[str] = None, sender: Optional[str] = None, transaction_id: Optional[str] = None,
+        validity_period: Optional[datetime] = None, priority: int = 0, flash_sms: bool = False
+    ) -> SendSmsResponse:
+        """Send a single SMS message."""
         response = self._client.service.SendSms(
             self.username, self.password, phone, message, sender,
             transaction_id, validity_period, priority, flash_sms)
@@ -111,31 +68,11 @@ class HostedSMSApi(object):
         return SendSmsResponse(response)
 
     def send_smses(
-            self, phones, message=None, sender=None,
-            transaction_id=None, validity_period=None, priority=0,
-            flash_sms=False):
-        """Call SendSmses API method
-        :param phones: Phone numbers where smses should be sent
-        :type phones: list of str
-        :param message: Message text
-        :type message: str
-        :param sender: Sender name (should be in array returned by
-            GetValidSenders()
-        :type sender: str
-        :param transaction_id: Id of transaction
-        :type transaction_id: str
-        :param validity_period: How long SMS should be valid.
-        :type validity_period: datetime
-        :param priority: How important is that message
-        :type priority: 0..3
-        :param flash_sms: Should message be sent as flash sms
-        :type flash_sms: bool
-
-        :return: Object representing response
-        :rtype: SmsesResponse
-
-        :raises HostedSmsApiException: when API return error
-        """
+        self, phones: List[str], message: Optional[str] = None, sender: Optional[str] = None,
+        transaction_id: Optional[str] = None, validity_period: Optional[datetime] = None, priority: int = 0,
+        flash_sms: bool = False
+    ) -> SendSmsesResponse:
+        """Send multiple SMS messages."""
         phones_obj = self._client.factory.create('ArrayOfString')
         for phone in phones:
             phones_obj.string.append(phone)
@@ -145,3 +82,19 @@ class HostedSMSApi(object):
         if not response.SendSmsesResult:
             raise HostedSMSApiException(response.ErrorMessage)
         return SendSmsesResponse(response)
+
+    def get_input_smses(self, _from: Optional[datetime]=None, to: Optional[datetime]=None, receipient: Optional[str]=None, mark_as_read: bool=False) -> GetInputSmsesResponse:
+        """Get input SMS messages for a given period and recipient."""
+        response = self._client.service.GetInputSmses(
+            self.username, self.password, _from, to, receipient, mark_as_read)
+        if not response.GetInputSmsesResult:
+            raise HostedSMSApiException(response.ErrorMessage)
+        return GetInputSmsesResponse(response)
+
+    def get_unread_input_smses(self) -> GetInputSmsesResponse:
+        """Get unread input SMS messages."""
+        response = self._client.service.GetUnreadInputSmses(
+            self.username, self.password)
+        if not response.GetUnreadInputSmsesResult:
+            raise HostedSMSApiException(response.ErrorMessage)
+        return GetInputSmsesResponse(response)
